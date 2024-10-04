@@ -1,6 +1,5 @@
 'use client'
 
-import { Button } from "@/components/ui/button"
 import { FiLinkedin, FiTwitter, FiMail, FiRefreshCw } from 'react-icons/fi'
 import { RiTwitterXLine } from "react-icons/ri"
 import Image from 'next/image'
@@ -92,7 +91,7 @@ export default function LoginFailedPage() {
           <div className="w-full md:w-1/2 space-y-8">
             <div className="text-center">
               <h2 className="text-3xl font-bold text-[#4f89b7]">Login Failed</h2>
-              <p className="mt-2 text-gray-600">We couldn't log you in. Please try again or contact support.</p>
+              <p className="mt-2 text-gray-600">We could not log you in. Please try again or contact support.</p>
             </div>
             
             <div className="space-y-4">

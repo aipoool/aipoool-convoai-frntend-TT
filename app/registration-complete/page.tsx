@@ -5,7 +5,6 @@ import { FiLinkedin, FiTwitter } from 'react-icons/fi'
 import { RiTwitterXLine } from "react-icons/ri"
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import Link from 'next/link'
 import { useEffect, useState } from "react"
 
 const GridBackground = () => {

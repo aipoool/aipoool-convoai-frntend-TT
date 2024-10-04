@@ -11,39 +11,63 @@ const GridBackground = () => {
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 })
 
   useEffect(() => {
-    const handleResize = () => {
-      setWindowSize({ width: window.innerWidth, height: window.innerHeight })
-    }
-    handleResize()
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
+      const handleResize = () => {
+          setWindowSize({ width: window.innerWidth, height: window.innerHeight })
+      }
+      handleResize()
+      window.addEventListener('resize', handleResize)
+      return () => window.removeEventListener('resize', handleResize)
   }, [])
 
+  const gridSize = 50
+  const columns = Math.ceil(windowSize.width / gridSize)
+  const rows = Math.ceil(windowSize.height / gridSize)
+
   return (
-    <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-      <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-        {[...Array(10)].map((_, i) => (
-          [...Array(10)].map((_, j) => (
-            <motion.line
-              key={`${i}-${j}`}
-              x1={`${j * 10}%`}
-              y1={`${i * 10}%`}
-              x2={`${(j + 1) * 10}%`}
-              y2={`${i * 10}%`}
-              stroke="#4f89b7"
-              strokeWidth="1"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: [0, 0.2, 0] }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                delay: (i + j) * 0.1,
-              }}
-            />
-          ))
-        ))}
-      </svg>
-    </div>
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+          <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+              {[...Array(rows)].map((_, rowIndex) => (
+                  [...Array(columns)].map((_, colIndex) => (
+                      <motion.line
+                          key={`${rowIndex}-${colIndex}`}
+                          x1={colIndex * gridSize}
+                          y1={rowIndex * gridSize}
+                          x2={(colIndex + 1) * gridSize}
+                          y2={rowIndex * gridSize}
+                          stroke="#4f89b7"
+                          strokeWidth="1"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: [0, 0.2, 0] }}
+                          transition={{
+                              duration: 3,
+                              repeat: Infinity,
+                              delay: (rowIndex + colIndex) * 0.1,
+                          }}
+                      />
+                  ))
+              ))}
+              {[...Array(columns)].map((_, colIndex) => (
+                  [...Array(rows)].map((_, rowIndex) => (
+                      <motion.line
+                          key={`${colIndex}-${rowIndex}-vertical`}
+                          x1={colIndex * gridSize}
+                          y1={rowIndex * gridSize}
+                          x2={colIndex * gridSize}
+                          y2={(rowIndex + 1) * gridSize}
+                          stroke="#4f89b7"
+                          strokeWidth="1"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: [0, 0.2, 0] }}
+                          transition={{
+                              duration: 3,
+                              repeat: Infinity,
+                              delay: (rowIndex + colIndex) * 0.1,
+                          }}
+                      />
+                  ))
+              ))}
+          </svg>
+      </div>
   )
 }
 
@@ -63,8 +87,10 @@ const PricingCard: React.FC<PricingCardProps> = ({ title, price, features, isPop
     whileHover={{ scale: 1.05 }}
   >
     {isPopular && (
-      <div className="absolute top-0 right-0 overflow-hidden w-28 h-28">
-        <div className="popular-tag">Popular</div>
+      <div className="popular-tag-container">
+        <div className="popular-tag">
+          <span>Popular</span>
+        </div>
       </div>
     )}
     <h3 className="text-2xl font-bold text-[#4f89b7] mb-4">{title}</h3>
@@ -92,36 +118,48 @@ export default function PricingPage() {
 
       <style jsx global>{`
         @keyframes wave {
-          0% {
-            transform: rotate(45deg) translateY(0%);
+          0%, 100% {
+            transform: rotate(45deg) translateY(0px);
           }
           50% {
-            transform: rotate(45deg) translateY(-2%);
+            transform: rotate(45deg) translateY(-10px);
           }
-          100% {
-            transform: rotate(45deg) translateY(0%);
-          }
+        }
+
+        .popular-tag-container {
+          position: absolute;
+          top: -5px;
+          right: -5px;
+          overflow: hidden;
+          width: 150px;
+          height: 150px;
+          z-index: 1;
         }
 
         .popular-tag {
           position: absolute;
-          top: 20px;
-          right: -27px;
-          background: #4f89b7;
+          top: 35px;
+          right: -35px;
+          width: 170px;
+          background-color: #4f89b7;
           color: white;
-          padding: 4px 30px;
-          font-size: 0.8rem;
-          font-weight: bold;
+          text-align: center;
           transform: rotate(45deg);
-          transform-origin: center;
           animation: wave 2s ease-in-out infinite;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .popular-tag span {
+          display: inline-block;
+          padding: 8px 0;
+          width: 100%;
+          font-size: 14px;
+          font-weight: bold;
         }
       `}</style>
 
       <header className="flex justify-between items-center p-4 bg-white bg-opacity-80 shadow-sm z-10">
         <div className="w-40 h-16 relative">
-          <Image src="" alt="Logo" layout="fill" objectFit="contain" />
+          <Image src="/convoai_100.svg" alt="Logo" layout="fill" objectFit="contain" />
         </div>
         <div className="flex space-x-4">
           <FiLinkedin className="text-[#4f89b7] text-2xl hover:text-[#3a6d94] transition-colors cursor-pointer" />
