@@ -103,11 +103,13 @@ export default function RegistrationCompletePage() {
     );
   }
 
-  async function deriveKey(keyMaterial: CryptoKey, salt: Uint8Array): Promise<CryptoKey> {
+  async function deriveKey(keyMaterial: CryptoKey, salt: string): Promise<CryptoKey> {
+    const enc = new TextEncoder();
+    const saltBuffer = enc.encode(salt);
     return window.crypto.subtle.deriveKey(
       {
         name: "PBKDF2",
-        salt: salt,
+        salt: saltBuffer,
         iterations: 100000,
         hash: "SHA-256"
       },
@@ -119,9 +121,9 @@ export default function RegistrationCompletePage() {
   }
 
   async function decryptToken(encryptedTokenWithIv: string): Promise<string> {
-    const password = "your-secret-password"; // Replace with your actual secret
+    const password = "ConvoAI@2096"; // Replace with your actual secret
     const keyMaterial = await getKeyMaterial(password);
-    const salt = new Uint8Array(16).fill(0); // Replace with your actual salt
+    const salt = "ConvoSalty@2096"; // Replace with your actual salt
 
     const key = await deriveKey(keyMaterial, salt);
     const encryptedData = hexStringToArrayBuffer(encryptedTokenWithIv);
