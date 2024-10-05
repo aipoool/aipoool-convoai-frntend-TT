@@ -71,6 +71,10 @@ const GridBackground = () => {
 }
 
 export default function LoginFailedPage() {
+  const handleRetyLogin = () => {
+    window.location.href = "https://convoai-v1.vercel.app/login";
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-white overflow-hidden">
       <GridBackground />
@@ -108,6 +112,7 @@ export default function LoginFailedPage() {
                 className="w-full py-2 px-4 bg-white text-[#4f89b7] border border-[#4f89b7] rounded-md shadow-lg flex items-center justify-center space-x-2 hover:bg-[#f0f7fc] transition-all duration-300"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={handleRetyLogin}
               >
                 <FiRefreshCw className="text-xl" />
                 <span>Retry Login</span>

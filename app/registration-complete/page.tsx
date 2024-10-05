@@ -72,6 +72,12 @@ const GridBackground = () => {
   }
 
 export default function RegistrationCompletePage() {
+  const handleAboutClick = () => {
+    window.location.href = "https://aipoool.com/";
+  };
+
+
+
   return (
     <div className="flex flex-col min-h-screen bg-white overflow-hidden">
       <GridBackground />
@@ -125,6 +131,7 @@ export default function RegistrationCompletePage() {
                     className="w-[48%]"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
+                    onClick={handleAboutClick}
                 >
                     <Button variant="outline" className="w-full">About AIPoool</Button>
                 </motion.div>

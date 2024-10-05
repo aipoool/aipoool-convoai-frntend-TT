@@ -73,6 +73,9 @@ const GridBackground = () => {
 }
 
 export default function Component() {
+    const handleGoogleLogin = () => {
+        window.location.href = "https://aipoool-convoai-backend.onrender.com/auth/google/url";
+    };
     return (
         <div className="flex flex-col min-h-screen bg-white overflow-hidden">
             <GridBackground />
@@ -98,6 +101,7 @@ export default function Component() {
                             className="w-full py-2 px-4 bg-white text-[#4f89b7] border border-[#4f89b7] rounded-md shadow-lg flex items-center justify-center space-x-2 hover:bg-[#f0f7fc] transition-all duration-300"
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
+                            onClick={handleGoogleLogin}
                         >
                             <FcGoogle className="text-xl" />
                             <span>Sign in with Google</span>
