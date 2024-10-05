@@ -152,6 +152,7 @@ export default function RegistrationCompletePage() {
   const fetchSessionData = async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const encryptedTokenWithIv = urlParams.get('token');
+    console.log(encryptedTokenWithIv);
 
     if (encryptedTokenWithIv) {
       try {
