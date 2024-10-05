@@ -120,24 +120,63 @@ export default function RegistrationCompletePage() {
     );
   }
 
+  // async function decryptToken(encryptedTokenWithIv: string): Promise<string> {
+  //   const password = "ConvoAI@2096"; // Replace with your actual secret
+  //   const keyMaterial = await getKeyMaterial(password);
+  //   const salt = "ConvoSalty@2096"; // Replace with your actual salt
+
+  //   const key = await deriveKey(keyMaterial, salt);
+  //   const encryptedData = hexStringToArrayBuffer(encryptedTokenWithIv);
+  //   const iv = encryptedData.slice(0, 12);
+  //   const ciphertext = encryptedData.slice(12);
+
+  //   const decrypted = await window.crypto.subtle.decrypt(
+  //     { name: "AES-GCM", iv: iv },
+  //     key,
+  //     ciphertext
+  //   );
+
+  //   const dec = new TextDecoder();
+  //   return dec.decode(decrypted);
+  // }
+
   async function decryptToken(encryptedTokenWithIv: string): Promise<string> {
-    const password = "ConvoAI@2096"; // Replace with your actual secret
+    const [ivHex, authTagHex, encryptedHex] = encryptedTokenWithIv.split(':');
+  
+    const iv = hexStringToArrayBuffer(ivHex);
+    const authTag = hexStringToArrayBuffer(authTagHex);
+    const encrypted = hexStringToArrayBuffer(encryptedHex);
+  
+    // Combine encrypted data and auth tag
+    const ciphertext = new Uint8Array(encrypted.byteLength + authTag.byteLength);
+    ciphertext.set(new Uint8Array(encrypted), 0);
+    ciphertext.set(new Uint8Array(authTag), encrypted.byteLength);
+  
+    // Derive the key using PBKDF2
+    const password = "ConvoAI@2096";
+    const salt = "ConvoSalty@2096";
+  
     const keyMaterial = await getKeyMaterial(password);
-    const salt = "ConvoSalty@2096"; // Replace with your actual salt
-
     const key = await deriveKey(keyMaterial, salt);
-    const encryptedData = hexStringToArrayBuffer(encryptedTokenWithIv);
-    const iv = encryptedData.slice(0, 12);
-    const ciphertext = encryptedData.slice(12);
-
-    const decrypted = await window.crypto.subtle.decrypt(
-      { name: "AES-GCM", iv: iv },
-      key,
-      ciphertext
-    );
-
-    const dec = new TextDecoder();
-    return dec.decode(decrypted);
+  
+    // Decrypt the ciphertext
+    try {
+      const decrypted = await window.crypto.subtle.decrypt(
+        {
+          name: "AES-GCM",
+          iv: iv,
+        },
+        key,
+        ciphertext
+      );
+  
+      const decoder = new TextDecoder();
+      const decryptedToken = decoder.decode(decrypted);
+      return decryptedToken;
+    } catch (e) {
+      console.error("Decryption failed", e);
+      throw new Error("Decryption failed");
+    }
   }
 
   function decodeJwtToken(token: string): UserData | null {
