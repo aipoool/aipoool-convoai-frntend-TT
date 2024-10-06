@@ -12,68 +12,68 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 
 const GridBackground = () => {
-    const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
-  
-    useEffect(() => {
-      const handleResize = () => {
-        setWindowSize({ width: window.innerWidth, height: window.innerHeight });
-      };
-      handleResize();
-      window.addEventListener("resize", handleResize);
-      return () => window.removeEventListener("resize", handleResize);
-    }, []);
-  
-    const gridSize = 50;
-    const columns = Math.ceil(windowSize.width / gridSize);
-    const rows = Math.ceil(windowSize.height / gridSize);
-  
-    return (
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-          {[...Array(rows)].map((_, rowIndex) =>
-            [...Array(columns)].map((_, colIndex) => (
-              <motion.line
-                key={`${rowIndex}-${colIndex}`}
-                x1={colIndex * gridSize}
-                y1={rowIndex * gridSize}
-                x2={(colIndex + 1) * gridSize}
-                y2={rowIndex * gridSize}
-                stroke="#4f89b7"
-                strokeWidth="1"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: [0, 0.2, 0] }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  delay: (rowIndex + colIndex) * 0.1,
-                }}
-              />
-            ))
-          )}
-          {[...Array(columns)].map((_, colIndex) =>
-            [...Array(rows)].map((_, rowIndex) => (
-              <motion.line
-                key={`${colIndex}-${rowIndex}-vertical`}
-                x1={colIndex * gridSize}
-                y1={rowIndex * gridSize}
-                x2={colIndex * gridSize}
-                y2={(rowIndex + 1) * gridSize}
-                stroke="#4f89b7"
-                strokeWidth="1"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: [0, 0.2, 0] }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  delay: (rowIndex + colIndex) * 0.1,
-                }}
-              />
-            ))
-          )}
-        </svg>
-      </div>
-    );
-  };
+  const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const gridSize = 50;
+  const columns = Math.ceil(windowSize.width / gridSize);
+  const rows = Math.ceil(windowSize.height / gridSize);
+
+  return (
+    <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+      <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+        {[...Array(rows)].map((_, rowIndex) =>
+          [...Array(columns)].map((_, colIndex) => (
+            <motion.line
+              key={`${rowIndex}-${colIndex}`}
+              x1={colIndex * gridSize}
+              y1={rowIndex * gridSize}
+              x2={(colIndex + 1) * gridSize}
+              y2={rowIndex * gridSize}
+              stroke="#4f89b7"
+              strokeWidth="1"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 0.2, 0] }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                delay: (rowIndex + colIndex) * 0.1,
+              }}
+            />
+          ))
+        )}
+        {[...Array(columns)].map((_, colIndex) =>
+          [...Array(rows)].map((_, rowIndex) => (
+            <motion.line
+              key={`${colIndex}-${rowIndex}-vertical`}
+              x1={colIndex * gridSize}
+              y1={rowIndex * gridSize}
+              x2={colIndex * gridSize}
+              y2={(rowIndex + 1) * gridSize}
+              stroke="#4f89b7"
+              strokeWidth="1"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 0.2, 0] }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                delay: (rowIndex + colIndex) * 0.1,
+              }}
+            />
+          ))
+        )}
+      </svg>
+    </div>
+  );
+};
 
 interface PlanDetails {
   name: string;

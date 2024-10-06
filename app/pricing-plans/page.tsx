@@ -71,14 +71,18 @@ const GridBackground = () => {
   )
 }
 
+
 interface PricingCardProps {
   title: string;
   price: number;
   features: string[];
   isPopular: boolean;
+  planId: string;
+  onSubscribe: (planId: string) => void;
+  isLoading: boolean;
 }
 
-const PricingCard: React.FC<PricingCardProps> = ({ title, price, features, isPopular }) => (
+const PricingCard: React.FC<PricingCardProps> = ({ title, price, features, isPopular, planId, onSubscribe, isLoading }) => (
   <motion.div
     className={`bg-white p-6 rounded-lg shadow-lg ${isPopular ? 'border-4 border-[#4f89b7]' : ''} relative overflow-hidden`}
     initial={{ opacity: 0, y: 50 }}
@@ -105,13 +109,44 @@ const PricingCard: React.FC<PricingCardProps> = ({ title, price, features, isPop
     </ul>
     <Button
       className="w-full bg-white text-[#4f89b7] border border-[#4f89b7] hover:bg-[#f0f7fc] transition-all duration-300"
+      onClick={() => onSubscribe(planId)}
+      disabled={isLoading}
     >
-      Choose Plan
+      {isLoading ? 'Processing...' : 'Choose Plan'}
     </Button>
   </motion.div>
 )
 
 export default function PricingPage() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubscribe = async (planId: string) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ planId }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Subscription failed');
+      }
+      
+      const data = await response.json();
+      window.location.href = data.paypalUrl;
+    } catch (err) {
+      setError('An error occurred while processing your subscription. Please try again.');
+      console.error('Subscription error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-white overflow-hidden">
       <GridBackground />
@@ -170,20 +205,24 @@ export default function PricingPage() {
       
       <main className="flex-grow flex flex-col items-center justify-center p-4 z-10">
         <h1 className="text-4xl font-bold text-[#4f89b7] mb-8">Choose Your Plan</h1>
+        {error && <div className="text-red-500 mb-4">{error}</div>}
         <div className="w-full max-w-7xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <PricingCard
             title="Basic"
-            price={9.99}
+            price={5.00}
             features={[
               "100 AI conversations/month",
               "Basic analytics",
               "Email support"
             ]}
             isPopular={false}
+            planId="P-6M154260SD140081PM4AXODA"
+            onSubscribe={handleSubscribe}
+            isLoading={isLoading}
           />
           <PricingCard
             title="Pro"
-            price={29.99}
+            price={7.00}
             features={[
               "Unlimited AI conversations",
               "Advanced analytics",
@@ -191,10 +230,13 @@ export default function PricingPage() {
               "Custom AI training"
             ]}
             isPopular={true}
+            planId="P-42686843K8735121EM4AXPKI"
+            onSubscribe={handleSubscribe}
+            isLoading={isLoading}
           />
           <PricingCard
-            title="Enterprise"
-            price={99.99}
+            title="Plus"
+            price={10.00}
             features={[
               "Unlimited AI conversations",
               "Advanced analytics",
@@ -203,6 +245,9 @@ export default function PricingPage() {
               "Dedicated account manager"
             ]}
             isPopular={false}
+            planId="P-5VX37406K54023111M4AXPYQ"
+            onSubscribe={handleSubscribe}
+            isLoading={isLoading}
           />
         </div>
       </main>
