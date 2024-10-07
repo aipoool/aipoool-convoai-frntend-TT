@@ -78,8 +78,7 @@ interface UserData {
 }
 
 export default function RegistrationCompletePage() {
-  const [userjwt, setUserjwt] = useState<string>('');
-
+  
   const handleAboutClick = () => {
     window.location.href = "https://aipoool.com/";
   };
@@ -176,13 +175,11 @@ export default function RegistrationCompletePage() {
     if (encryptedTokenWithIv) {
       try {
         const jwtToken = await decryptToken(encryptedTokenWithIv);
-        setUserjwt(jwtToken);
         const tokenData = decodeJwtToken(jwtToken);
         if (tokenData) {
 
           // Message sent to the extension
           if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
-            console.log(encryptedTokenWithIv, 'received'); 
             chrome.runtime.sendMessage(
               extensionId,
               {
@@ -207,13 +204,13 @@ export default function RegistrationCompletePage() {
 
   useEffect(() => {
     fetchSessionData();
-  }, []);
+  });
 
-  useEffect(() => {
-    if (userjwt) {
-      localStorage.setItem('convoaiUserProfData', JSON.stringify(userjwt));
-    }
-  }, [userjwt]);
+  // useEffect(() => {
+  //   if (userjwt) {
+  //     localStorage.setItem('convoaiUserProfData', JSON.stringify(userjwt));
+  //   }
+  // }, [userjwt]);
 
     return (
       <div className="flex flex-col min-h-screen bg-white overflow-hidden">

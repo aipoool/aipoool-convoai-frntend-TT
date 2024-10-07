@@ -72,6 +72,7 @@ const GridBackground = () => {
 }
 
 
+
 interface PricingCardProps {
   title: string;
   price: number;
@@ -120,6 +121,107 @@ const PricingCard: React.FC<PricingCardProps> = ({ title, price, features, isPop
 export default function PricingPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [userJwt, setUserJwt] = useState<string>('');
+
+  function hexStringToArrayBuffer(hexString: string): ArrayBuffer {
+    const bytes = new Uint8Array(hexString.length / 2);
+    for (let i = 0; i < hexString.length; i += 2) {
+      bytes[i / 2] = parseInt(hexString.substr(i, 2), 16);
+    }
+    return bytes.buffer;
+  }
+
+  async function getKeyMaterial(password: string): Promise<CryptoKey> {
+    const enc = new TextEncoder();
+    return window.crypto.subtle.importKey(
+      "raw",
+      enc.encode(password),
+      { name: "PBKDF2" },
+      false,
+      ["deriveBits", "deriveKey"]
+    );
+  }
+
+  async function deriveKey(keyMaterial: CryptoKey, salt: string): Promise<CryptoKey> {
+    const enc = new TextEncoder();
+    const saltBuffer = enc.encode(salt);
+    return window.crypto.subtle.deriveKey(
+      {
+        name: "PBKDF2",
+        salt: saltBuffer,
+        iterations: 100000,
+        hash: "SHA-256"
+      },
+      keyMaterial,
+      { name: "AES-GCM", length: 256 },
+      true,
+      ["encrypt", "decrypt"]
+    );
+  }
+
+
+  async function decryptToken(encryptedTokenWithIv: string): Promise<string> {
+    const [ivHex, authTagHex, encryptedHex] = encryptedTokenWithIv.split(':');
+  
+    const iv = hexStringToArrayBuffer(ivHex);
+    const authTag = hexStringToArrayBuffer(authTagHex);
+    const encrypted = hexStringToArrayBuffer(encryptedHex);
+  
+    // Combine encrypted data and auth tag
+    const ciphertext = new Uint8Array(encrypted.byteLength + authTag.byteLength);
+    ciphertext.set(new Uint8Array(encrypted), 0);
+    ciphertext.set(new Uint8Array(authTag), encrypted.byteLength);
+  
+    // Derive the key using PBKDF2
+    const password = "ConvoAI@2096";
+    const salt = "ConvoSalty@2096";
+  
+    const keyMaterial = await getKeyMaterial(password);
+    const key = await deriveKey(keyMaterial, salt);
+  
+    // Decrypt the ciphertext
+    try {
+      const decrypted = await window.crypto.subtle.decrypt(
+        {
+          name: "AES-GCM",
+          iv: iv,
+        },
+        key,
+        ciphertext
+      );
+  
+      const decoder = new TextDecoder();
+      const decryptedToken = decoder.decode(decrypted);
+      return decryptedToken;
+    } catch (e) {
+      console.error("Decryption failed", e);
+      throw new Error("Decryption failed");
+    }
+  }
+
+
+
+  const fetchSessionData = async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const encryptedTokenWithIv = urlParams.get('token');
+
+    if (encryptedTokenWithIv) {
+      try {
+        const jwtToken = await decryptToken(encryptedTokenWithIv);
+        // const tokenData = decodeJwtToken(jwtToken);
+        if (jwtToken) {
+          console.log("JWT Token here : " , jwtToken);
+          setUserJwt(jwtToken);
+        }
+      } catch (error) {
+        console.error("Failed to decrypt token:", error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchSessionData();
+  });
 
   const handleSubscribe = async (planId: string) => {
     setIsLoading(true);
@@ -129,6 +231,7 @@ export default function PricingPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userJwt}`,
         },
         body: JSON.stringify({ planId }),
       });
