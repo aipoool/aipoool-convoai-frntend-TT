@@ -182,6 +182,7 @@ export default function RegistrationCompletePage() {
 
           // Message sent to the extension
           if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+            console.log(encryptedTokenWithIv, 'received'); 
             chrome.runtime.sendMessage(
               extensionId,
               {
