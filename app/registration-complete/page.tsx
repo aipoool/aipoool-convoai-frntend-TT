@@ -120,25 +120,6 @@ export default function RegistrationCompletePage() {
     );
   }
 
-  // async function decryptToken(encryptedTokenWithIv: string): Promise<string> {
-  //   const password = "ConvoAI@2096"; // Replace with your actual secret
-  //   const keyMaterial = await getKeyMaterial(password);
-  //   const salt = "ConvoSalty@2096"; // Replace with your actual salt
-
-  //   const key = await deriveKey(keyMaterial, salt);
-  //   const encryptedData = hexStringToArrayBuffer(encryptedTokenWithIv);
-  //   const iv = encryptedData.slice(0, 12);
-  //   const ciphertext = encryptedData.slice(12);
-
-  //   const decrypted = await window.crypto.subtle.decrypt(
-  //     { name: "AES-GCM", iv: iv },
-  //     key,
-  //     ciphertext
-  //   );
-
-  //   const dec = new TextDecoder();
-  //   return dec.decode(decrypted);
-  // }
 
   async function decryptToken(encryptedTokenWithIv: string): Promise<string> {
     const [ivHex, authTagHex, encryptedHex] = encryptedTokenWithIv.split(':');
@@ -191,12 +172,10 @@ export default function RegistrationCompletePage() {
   const fetchSessionData = async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const encryptedTokenWithIv = urlParams.get('token');
-    console.log(encryptedTokenWithIv);
 
     if (encryptedTokenWithIv) {
       try {
         const jwtToken = await decryptToken(encryptedTokenWithIv);
-        console.log("jwtToken", jwtToken);
         setUserjwt(jwtToken);
         const tokenData = decodeJwtToken(jwtToken);
         if (tokenData) {
@@ -208,6 +187,7 @@ export default function RegistrationCompletePage() {
               {
                 type: "convoai-login-data",
                 info: tokenData,
+                unencrypted: encryptedTokenWithIv,
                 jwtToken: jwtToken,
               },
               function (response: { success: boolean }) {
