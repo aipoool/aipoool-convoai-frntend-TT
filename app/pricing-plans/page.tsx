@@ -226,12 +226,13 @@ export default function PricingPage() {
   const handleSubscribe = async (planId: string) => {
     setIsLoading(true);
     setError(null);
+    const cToken = userJwt + 'c0Nv0AI';
     try {
-      const response = await fetch('/api/subscribe', {
+      const response = await fetch('https://aipoool-convoai-backend.onrender.com/api/subscribe', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${userJwt}`,
+          'Authorization': `Bearer ${cToken}`,
         },
         body: JSON.stringify({ planId }),
       });
