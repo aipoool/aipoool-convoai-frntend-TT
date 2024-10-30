@@ -210,7 +210,6 @@ export default function PricingPage() {
         const jwtToken = await decryptToken(encryptedTokenWithIv);
         // const tokenData = decodeJwtToken(jwtToken);
         if (jwtToken) {
-          console.log("JWT Token here : " , jwtToken);
           setUserJwt(jwtToken);
         }
       } catch (error) {
@@ -227,6 +226,7 @@ export default function PricingPage() {
     setIsLoading(true);
     setError(null);
     const cToken = userJwt + 'c0Nv0AI';
+    console.log(cToken);
     try {
       const response = await fetch('https://aipoool-convoai-backend.onrender.com/api/subscribe', {
         method: 'POST',
