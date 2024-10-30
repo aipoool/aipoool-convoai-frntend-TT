@@ -246,6 +246,8 @@ export default function PricingPage() {
       
       const data = await response.json();
       console.log(data); 
+
+      
       window.location.href = data.paypalUrl;
     } catch (err) {
       setError('An error occurred while processing your subscription. Please try again.');
