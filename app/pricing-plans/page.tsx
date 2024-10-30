@@ -236,6 +236,9 @@ export default function PricingPage() {
         },
         body: JSON.stringify({ planId }),
       });
+
+
+      console.log(response)
       
       if (!response.ok) {
         throw new Error('Subscription failed');
