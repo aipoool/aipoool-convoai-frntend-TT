@@ -326,7 +326,7 @@ export default function PricingPage() {
               "Email support"
             ]}
             isPopular={false}
-            planId="P-6M154260SD140081PM4AXODA"
+            planId="P-3W1751940G6571619M4RWSSQ"
             onSubscribe={handleSubscribe}
             isLoading={isLoading}
           />
@@ -340,7 +340,7 @@ export default function PricingPage() {
               "Custom AI training"
             ]}
             isPopular={true}
-            planId="P-42686843K8735121EM4AXPKI"
+            planId="P-6LH90668L1438352TM4RWTAA"
             onSubscribe={handleSubscribe}
             isLoading={isLoading}
           />
@@ -355,7 +355,7 @@ export default function PricingPage() {
               "Dedicated account manager"
             ]}
             isPopular={false}
-            planId="P-5VX37406K54023111M4AXPYQ"
+            planId="P-12F21880NW994562AM4RWTOI"
             onSubscribe={handleSubscribe}
             isLoading={isLoading}
           />
