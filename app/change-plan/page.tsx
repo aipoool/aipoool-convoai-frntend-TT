@@ -14,11 +14,14 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 
-
 interface Plan {
   name: string
   price: number
   features: string[]
+}
+
+interface ErrorMessageProps {
+  message: string
 }
 
 const plans: Plan[] = [
@@ -66,6 +69,15 @@ const downgradeReasons = [
   'Other'
 ]
 
+const ErrorMessage: React.FC<ErrorMessageProps> = ({ message }) => (
+  <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
+    <div className="flex items-center">
+      <FiAlertCircle className="text-red-400 mr-2" />
+      <p className="text-red-700">{message}</p>
+    </div>
+  </div>
+)
+
 export default function ChangePlanWizard() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -76,10 +88,8 @@ export default function ChangePlanWizard() {
   const [customReason, setCustomReason] = useState('')
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [token, setToken] = useState<string | null>(null)
-
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-
+  const [token, setToken] = useState<string | null>(null)
 
   useEffect(() => {
     const urlToken = searchParams.get('token')
@@ -97,7 +107,7 @@ export default function ChangePlanWizard() {
   const fetchCurrentPlan = async (token: string) => {
     try {
       setIsLoading(true)
-      setError(null)
+      setErrorMessage(null)
       // Replace with your actual API endpoint
       const response = await fetch('/api/current-plan', {
         headers: {
@@ -119,7 +129,7 @@ export default function ChangePlanWizard() {
   const handlePlanChange = async () => {
     try {
       setIsLoading(true)
-      setError(null)
+      setErrorMessage(null)
       // Replace with your actual API endpoint
       const response = await fetch('/api/change-plan', {
         method: 'POST',
@@ -139,7 +149,6 @@ export default function ChangePlanWizard() {
 
       if (!response.ok) throw new Error('Failed to process plan change')
 
-      const data = await response.json()
       router.push(`/payment-result?status=success&plan=${selectedPlan?.name}`)
     } catch (error) {
       setErrorMessage('Failed to process your request. Please try again.')
@@ -151,25 +160,7 @@ export default function ChangePlanWizard() {
   const nextStep = () => setStep(step + 1)
   const prevStep = () => setStep(step - 1)
 
-  if (isLoading || !currentPlan) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-      </div>
-    )
-  }
-
-    // Error display component
-    const ErrorMessage = ({ message }: { message: string }) => (
-      <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
-        <div className="flex items-center">
-          <FiAlertCircle className="text-red-400 mr-2" />
-          <p className="text-red-700">{message}</p>
-        </div>
-      </div>
-    )
-
-    const renderStep = (): ReactNode => {
+  const renderStep = (): ReactNode => {
     switch (step) {
       case 1:
         return (
@@ -187,16 +178,16 @@ export default function ChangePlanWizard() {
               <CardContent className="space-y-4">
                 <div className="grid gap-2">
                   <Label>Plan Name</Label>
-                  <p className="text-lg font-medium">{currentPlan.name}</p>
+                  <p className="text-lg font-medium">{currentPlan?.name}</p>
                 </div>
                 <div className="grid gap-2">
                   <Label>Price</Label>
-                  <p className="text-lg font-medium">${currentPlan.price}/month</p>
+                  <p className="text-lg font-medium">${currentPlan?.price}/month</p>
                 </div>
                 <div className="grid gap-2">
                   <Label>Features</Label>
                   <ul className="space-y-2">
-                    {currentPlan.features.map((feature, index) => (
+                    {currentPlan?.features.map((feature, index) => (
                       <li key={index} className="flex items-center gap-2">
                         <FiCheck className="text-green-500 flex-shrink-0" />
                         <span>{feature}</span>
@@ -250,13 +241,12 @@ export default function ChangePlanWizard() {
           </motion.div>
         )
 
-      case 3:
+      case 3: {
         if (action !== 'downgrade') {
-          // Execute nextStep and return null (valid ReactNode)
           nextStep();
           return null;
         }
-      
+
         return (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -302,7 +292,8 @@ export default function ChangePlanWizard() {
               </CardFooter>
             </Card>
           </motion.div>
-        );
+        )
+      }
 
       case 4:
         return (
@@ -324,8 +315,8 @@ export default function ChangePlanWizard() {
                   {plans
                     .filter((plan) => 
                       action === 'upgrade' 
-                        ? plan.price > currentPlan.price 
-                        : plan.price < currentPlan.price
+                        ? plan.price > (currentPlan?.price || 0)
+                        : plan.price < (currentPlan?.price || 0)
                     )
                     .map((plan) => (
                       <Card
@@ -381,7 +372,7 @@ export default function ChangePlanWizard() {
               <CardContent className="space-y-4">
                 <div className="grid gap-2">
                   <Label>Current Plan</Label>
-                  <p>{currentPlan.name} (${currentPlan.price}/month)</p>
+                  <p>{currentPlan?.name} (${currentPlan?.price}/month)</p>
                 </div>
                 <div className="grid gap-2">
                   <Label>New Plan</Label>
@@ -415,10 +406,18 @@ export default function ChangePlanWizard() {
     }
   }
 
+  if (isLoading && !currentPlan) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-white overflow-hidden">
       <header className="flex justify-between items-center p-4 bg-white bg-opacity-80 shadow-sm z-10">
-        <Image src="/logo.svg" alt="ConvoAI Logo" width={100} height={40} />
+        <Image  src="/logo.svg" alt="ConvoAI Logo" width={100} height={40} />
         <div className="flex space-x-4">
           <FiLinkedin className="text-[#4f89b7] text-2xl hover:text-[#3a6d94] transition-colors cursor-pointer" />
           <FiTwitter className="text-[#4f89b7] text-2xl hover:text-[#3a6d94] transition-colors cursor-pointer" />
@@ -449,8 +448,4 @@ export default function ChangePlanWizard() {
       </footer>
     </div>
   )
-}
-
-function setError(arg0: null) {
-  throw new Error('Function not implemented.')
 }
