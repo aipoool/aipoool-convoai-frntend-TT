@@ -9,7 +9,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 export default function PaymentSuccessContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const plan = searchParams.get('plan')
+  const plan = searchParams.get('token')
+  console.log("Token here :: " , plan)
 
   useEffect(() => {
     if (!plan) {

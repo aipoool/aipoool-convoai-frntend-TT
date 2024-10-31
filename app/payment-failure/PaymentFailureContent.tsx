@@ -9,8 +9,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 export default function PaymentFailureContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const error = searchParams.get('error')
-
+  const error = searchParams.get('token')
+  console.log("Token here :: " , error);
   useEffect(() => {
     if (!error) {
       router.push('/')
