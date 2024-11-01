@@ -1,22 +1,57 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { CheckCircle2 } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 
+
+interface SubscriptionDetails {
+  planName: string;
+  status: string;
+  nextBillingDate: string;
+}
+
 export default function PaymentSuccessContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const plan = searchParams.get('token')
-  console.log("Token here :: " , plan)
+  const subscriptionId = searchParams.get('id')
+  const token = searchParams.get('token'); 
+  const [subscriptionDetails, setSubscriptionDetails] = useState<SubscriptionDetails | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!plan) {
-      router.push('/')
+
+    const fetchSubscriptionDetails = async () => {
+      try {
+        const response = await fetch(`/api/subscription-details/${subscriptionId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}` // Assuming you store the auth token in localStorage
+          }
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch subscription details')
+        }
+
+        const data = await response.json()
+        console.log("The subscription details here :: " , data); 
+      
+        setSubscriptionDetails(data)
+      } catch (err) {
+        setError('An error occurred while fetching subscription details')
+        console.error('Error fetching subscription details:', err)
+      } finally {
+        setIsLoading(false)
+      }
     }
-  }, [plan, router])
+
+    fetchSubscriptionDetails()
+
+  },[subscriptionId, router])
 
   return (
     <Card>
@@ -31,7 +66,7 @@ export default function PaymentSuccessContent() {
       </CardHeader>
       <CardContent className="text-center space-y-4">
         <p className="text-muted-foreground">
-          You are now subscribed to the {plan} plan. Your new features are now active.
+          You are now subscribed to the plan. Your new features are now active.
         </p>
         <p className="text-sm text-muted-foreground">
           A confirmation email has been sent to your registered email address.
