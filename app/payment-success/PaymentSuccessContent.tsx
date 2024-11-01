@@ -49,7 +49,10 @@ export default function PaymentSuccessContent() {
       }
     }
 
-    fetchSubscriptionDetails()
+    //fetchSubscriptionDetails()
+
+    console.log(subscriptionId); 
+    console.log(token); 
 
   },[subscriptionId, router])
 
