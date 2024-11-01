@@ -27,7 +27,7 @@ export default function PaymentSuccessContent() {
 
     const fetchSubscriptionDetails = async () => {
       try {
-        const response = await fetch(`/api/subscription-details/${subscriptionId}`, {
+        const response = await fetch(`https://aipoool-convoai-backend.onrender.com/api/subscription-details/${subscriptionId}`, {
           headers: {
             'Authorization': `Bearer ${token}` // Assuming you store the auth token in localStorage
           }
@@ -49,12 +49,10 @@ export default function PaymentSuccessContent() {
       }
     }
 
-    //fetchSubscriptionDetails()
+    fetchSubscriptionDetails()
 
-    console.log(subscriptionId); 
-    console.log(token); 
 
-  },[subscriptionId, router])
+  },[subscriptionId, token, router])
 
   return (
     <Card>
