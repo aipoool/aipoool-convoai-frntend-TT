@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
@@ -135,10 +136,8 @@ export default function ChangePlanForm() {
     }
   }
 
-  const fetchCurrentPlan = async (token: string) => {
+  const fetchCurrentPlan = useCallback(async (token: string) => {
     try {
-      setIsLoading(true)
-      setError(null)
       const response = await fetch('https://aipoool-convoai-backend.onrender.com/api/current-plan', {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -148,39 +147,40 @@ export default function ChangePlanForm() {
       if (!response.ok) throw new Error('Failed to fetch current plan')
       
       const data = await response.json()
-      console.log(data); 
       setCurrentPlan(data)
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       setError('Failed to fetch your current plan. Please try again.')
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [])
 
-  const fetchSessionData = useCallback(async () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const encryptedTokenWithIv = urlParams.get('token');
-
-    if (encryptedTokenWithIv) {
-      try {
-        const jwtToken = await decryptToken(encryptedTokenWithIv);
-        if (jwtToken) {
-          const cToken = jwtToken + 'c0Nv0AI';
-          fetchCurrentPlan(cToken);
-        }
-      } catch (error) {
-        console.error("Failed to decrypt token:", error);
-        setError("Failed to decrypt token. Please try again.");
-      }
-    } else {
-      setError("No token found. Please ensure you're accessing this page correctly.");
-    }
-  }, [fetchCurrentPlan]);
 
   useEffect(() => {
+    const fetchSessionData = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const encryptedTokenWithIv = urlParams.get('token');
+
+      if (encryptedTokenWithIv) {
+        try {
+          const jwtToken = await decryptToken(encryptedTokenWithIv);
+          if (jwtToken) {
+            const cToken = jwtToken + 'c0Nv0AI';
+            await fetchCurrentPlan(cToken);
+          }
+        } catch (error) {
+          console.error("Failed to decrypt token:", error);
+          setError("Failed to decrypt token. Please try again.");
+          setIsLoading(false);
+        }
+      } else {
+        setError("No token found. Please ensure you're accessing this page correctly.");
+        setIsLoading(false);
+      }
+    };
+
     fetchSessionData();
-  }, [fetchSessionData]);
+  }, [decryptToken, fetchCurrentPlan]);
 
   if (isLoading) {
     return (
