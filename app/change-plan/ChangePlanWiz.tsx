@@ -65,7 +65,7 @@ export default function ChangePlanForm() {
     try {
       setIsLoading(true)
       setError(null)
-      const response = await fetch('/api/current-plan', {
+      const response = await fetch('https://aipoool-convoai-backend.onrender.com/api/current-plan', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
