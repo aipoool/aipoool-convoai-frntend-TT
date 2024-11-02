@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AlertCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -158,28 +158,29 @@ export default function ChangePlanForm() {
     }
   }
 
+  const fetchSessionData = useCallback(async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const encryptedTokenWithIv = urlParams.get('token');
 
+    if (encryptedTokenWithIv) {
+      try {
+        const jwtToken = await decryptToken(encryptedTokenWithIv);
+        if (jwtToken) {
+          const cToken = jwtToken + 'c0Nv0AI';
+          fetchCurrentPlan(cToken);
+        }
+      } catch (error) {
+        console.error("Failed to decrypt token:", error);
+        setError("Failed to decrypt token. Please try again.");
+      }
+    } else {
+      setError("No token found. Please ensure you're accessing this page correctly.");
+    }
+  }, [fetchCurrentPlan]);
 
   useEffect(() => {
-    const fetchSessionData = async () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const encryptedTokenWithIv = urlParams.get('token');
-  
-      if (encryptedTokenWithIv) {
-        try {
-          const jwtToken = await decryptToken(encryptedTokenWithIv);
-          // const tokenData = decodeJwtToken(jwtToken);
-          if (jwtToken) {
-            const cToken = jwtToken + 'c0Nv0AI';
-            fetchCurrentPlan(cToken);
-          }
-        } catch (error) {
-          console.error("Failed to decrypt token:", error);
-        }
-      }
-    };
     fetchSessionData();
-  }, [decryptToken]);
+  }, [fetchSessionData]);
 
   if (isLoading) {
     return (
