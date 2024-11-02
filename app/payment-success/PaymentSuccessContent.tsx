@@ -44,7 +44,7 @@ export default function PaymentSuccessContent() {
 
         setPlanDetails({
           name: data.name,
-          price: data.billing_cycles[0].pricing_scheme.fixed_price.value + "$",
+          price: data.billing_cycles[0].pricing_scheme.fixed_price.value,
           startDate: new Date(),
         })
       

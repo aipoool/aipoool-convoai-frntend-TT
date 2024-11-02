@@ -74,6 +74,7 @@ export default function ChangePlanForm() {
       if (!response.ok) throw new Error('Failed to fetch current plan')
       
       const data = await response.json()
+      console.log(data); 
       setCurrentPlan(data)
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
