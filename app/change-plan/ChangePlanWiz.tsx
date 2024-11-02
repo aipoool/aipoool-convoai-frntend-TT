@@ -158,26 +158,28 @@ export default function ChangePlanForm() {
     }
   }
 
-  const fetchSessionData = async () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const encryptedTokenWithIv = urlParams.get('token');
 
-    if (encryptedTokenWithIv) {
-      try {
-        const jwtToken = await decryptToken(encryptedTokenWithIv);
-        // const tokenData = decodeJwtToken(jwtToken);
-        if (jwtToken) {
-          fetchCurrentPlan(jwtToken);
-        }
-      } catch (error) {
-        console.error("Failed to decrypt token:", error);
-      }
-    }
-  };
 
   useEffect(() => {
+    const fetchSessionData = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const encryptedTokenWithIv = urlParams.get('token');
+  
+      if (encryptedTokenWithIv) {
+        try {
+          const jwtToken = await decryptToken(encryptedTokenWithIv);
+          // const tokenData = decodeJwtToken(jwtToken);
+          if (jwtToken) {
+            const cToken = jwtToken + 'c0Nv0AI';
+            fetchCurrentPlan(cToken);
+          }
+        } catch (error) {
+          console.error("Failed to decrypt token:", error);
+        }
+      }
+    };
     fetchSessionData();
-  });
+  }, [decryptToken]);
 
   if (isLoading) {
     return (
