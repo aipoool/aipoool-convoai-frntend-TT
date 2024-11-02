@@ -56,86 +56,13 @@ interface Plan {
 export default function ChangePlanForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const token = searchParams?.get('token');
   const [currentPlan, setCurrentPlan] = useState<Plan | null>(null)
   const [action, setAction] = useState<'upgrade' | 'downgrade' | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>('Failed to fetch your current plan. Please try again.')
 
-  function hexStringToArrayBuffer(hexString: string): ArrayBuffer {
-    const bytes = new Uint8Array(hexString.length / 2);
-    for (let i = 0; i < hexString.length; i += 2) {
-      bytes[i / 2] = parseInt(hexString.substr(i, 2), 16);
-    }
-    return bytes.buffer;
-  }
 
-  async function getKeyMaterial(password: string): Promise<CryptoKey> {
-    const enc = new TextEncoder();
-    return window.crypto.subtle.importKey(
-      "raw",
-      enc.encode(password),
-      { name: "PBKDF2" },
-      false,
-      ["deriveBits", "deriveKey"]
-    );
-  }
-
-  async function deriveKey(keyMaterial: CryptoKey, salt: string): Promise<CryptoKey> {
-    const enc = new TextEncoder();
-    const saltBuffer = enc.encode(salt);
-    return window.crypto.subtle.deriveKey(
-      {
-        name: "PBKDF2",
-        salt: saltBuffer,
-        iterations: 100000,
-        hash: "SHA-256"
-      },
-      keyMaterial,
-      { name: "AES-GCM", length: 256 },
-      true,
-      ["encrypt", "decrypt"]
-    );
-  }
-
-
-  async function decryptToken(encryptedTokenWithIv: string): Promise<string> {
-    const [ivHex, authTagHex, encryptedHex] = encryptedTokenWithIv.split(':');
-  
-    const iv = hexStringToArrayBuffer(ivHex);
-    const authTag = hexStringToArrayBuffer(authTagHex);
-    const encrypted = hexStringToArrayBuffer(encryptedHex);
-  
-    // Combine encrypted data and auth tag
-    const ciphertext = new Uint8Array(encrypted.byteLength + authTag.byteLength);
-    ciphertext.set(new Uint8Array(encrypted), 0);
-    ciphertext.set(new Uint8Array(authTag), encrypted.byteLength);
-  
-    // Derive the key using PBKDF2
-    const password = "ConvoAI@2096";
-    const salt = "ConvoSalty@2096";
-  
-    const keyMaterial = await getKeyMaterial(password);
-    const key = await deriveKey(keyMaterial, salt);
-  
-    // Decrypt the ciphertext
-    try {
-      const decrypted = await window.crypto.subtle.decrypt(
-        {
-          name: "AES-GCM",
-          iv: iv,
-        },
-        key,
-        ciphertext
-      );
-  
-      const decoder = new TextDecoder();
-      const decryptedToken = decoder.decode(decrypted);
-      return decryptedToken;
-    } catch (e) {
-      console.error("Decryption failed", e);
-      throw new Error("Decryption failed");
-    }
-  }
 
   const fetchCurrentPlan = async (token: string) => {
     try {
@@ -161,15 +88,9 @@ export default function ChangePlanForm() {
   }
 
   useEffect(() => {
-    const token = searchParams?.get('token');
     if(token){
       try {
-        const jwtToken = decryptToken(token);
-        // const tokenData = decodeJwtToken(jwtToken);
-        if (jwtToken) {
-          const cToken = jwtToken + 'c0Nv0AI';
-          fetchCurrentPlan(cToken);
-        }
+          fetchCurrentPlan(token);
       } catch (error) {
         console.error("Failed to decrypt token:", error);
       }
