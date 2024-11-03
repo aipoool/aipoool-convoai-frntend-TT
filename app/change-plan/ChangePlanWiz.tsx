@@ -17,48 +17,13 @@ interface Plan {
   features: string[]
 }
 
-// const plans: Plan[] = [
-//   {
-//     name: 'Basic',
-//     price: 9.99,
-//     features: [
-//       'Up to 100 conversations/month',
-//       'Basic AI responses',
-//       'Email support',
-//       'Standard response time'
-//     ]
-//   },
-//   {
-//     name: 'Pro',
-//     price: 29.99,
-//     features: [
-//       'Unlimited conversations',
-//       'Advanced AI responses',
-//       'Priority support',
-//       'Faster response time',
-//       'Custom AI training'
-//     ]
-//   },
-//   {
-//     name: 'Enterprise',
-//     price: 99.99,
-//     features: [
-//       'Everything in Pro',
-//       'Dedicated account manager',
-//       'Custom integration',
-//       'API access',
-//       'SLA guarantee',
-//       'Advanced analytics'
-//     ]
-//   }
-// ]
-
 export default function ChangePlanForm() {
   const router = useRouter()
   const [currentPlan, setCurrentPlan] = useState<Plan | null>(null)
   const [action, setAction] = useState<'upgrade' | 'downgrade' | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>('Failed to fetch your current plan. Please try again.')
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [hasFetched, setHasFetched] = useState(false)
 
   function hexStringToArrayBuffer(hexString: string): ArrayBuffer {
     const bytes = new Uint8Array(hexString.length / 2);
@@ -96,7 +61,6 @@ export default function ChangePlanForm() {
     );
   }
 
-
   async function decryptToken(encryptedTokenWithIv: string): Promise<string> {
     const [ivHex, authTagHex, encryptedHex] = encryptedTokenWithIv.split(':');
   
@@ -104,19 +68,16 @@ export default function ChangePlanForm() {
     const authTag = hexStringToArrayBuffer(authTagHex);
     const encrypted = hexStringToArrayBuffer(encryptedHex);
   
-    // Combine encrypted data and auth tag
     const ciphertext = new Uint8Array(encrypted.byteLength + authTag.byteLength);
     ciphertext.set(new Uint8Array(encrypted), 0);
     ciphertext.set(new Uint8Array(authTag), encrypted.byteLength);
   
-    // Derive the key using PBKDF2
     const password = "ConvoAI@2096";
     const salt = "ConvoSalty@2096";
   
     const keyMaterial = await getKeyMaterial(password);
     const key = await deriveKey(keyMaterial, salt);
   
-    // Decrypt the ciphertext
     try {
       const decrypted = await window.crypto.subtle.decrypt(
         {
@@ -152,12 +113,14 @@ export default function ChangePlanForm() {
       setError('Failed to fetch your current plan. Please try again.')
     } finally {
       setIsLoading(false)
+      setHasFetched(true)
     }
   }, [])
 
-
   useEffect(() => {
     const fetchSessionData = async () => {
+      if (hasFetched) return; // Skip if we've already fetched
+
       const urlParams = new URLSearchParams(window.location.search);
       const encryptedTokenWithIv = urlParams.get('token');
 
@@ -172,15 +135,17 @@ export default function ChangePlanForm() {
           console.error("Failed to decrypt token:", error);
           setError("Failed to decrypt token. Please try again.");
           setIsLoading(false);
+          setHasFetched(true);
         }
       } else {
         setError("No token found. Please ensure you're accessing this page correctly.");
         setIsLoading(false);
+        setHasFetched(true);
       }
     };
 
     fetchSessionData();
-  }, [decryptToken, fetchCurrentPlan]);
+  }, [fetchCurrentPlan, hasFetched]);
 
   if (isLoading) {
     return (
@@ -224,7 +189,7 @@ export default function ChangePlanForm() {
                 </div>
                 <div className="space-y-2">
                   <Label className="text-base">Features</Label>
-                  <div className="text-muted-foreground">Loading features...</div>
+                  <div className="text-muted-foreground">No features available</div>
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between">
